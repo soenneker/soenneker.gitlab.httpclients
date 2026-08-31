@@ -11,13 +11,14 @@ using Soenneker.Utils.HttpClientCache.Abstract;
 
 namespace Soenneker.GitLab.HttpClients;
 
-///<inheritdoc cref="IGitLabOpenApiHttpClient"/>
 public sealed class GitLabOpenApiHttpClient : IGitLabOpenApiHttpClient
 {
     private readonly IHttpClientCache _httpClientCache;
     private readonly IConfiguration _config;
 
-    private const string _prodBaseUrl = "https://{hostname}/";
+    private readonly string _cacheKey = $"{nameof(GitLabOpenApiHttpClient)}:{Guid.NewGuid():N}";
+
+    private const string _prodBaseUrl = "https://gitlab.com/";
 
     public GitLabOpenApiHttpClient(IHttpClientCache httpClientCache, IConfiguration config)
     {
@@ -27,11 +28,11 @@ public sealed class GitLabOpenApiHttpClient : IGitLabOpenApiHttpClient
 
     public ValueTask<HttpClient> Get(CancellationToken cancellationToken = default)
     {
-        return _httpClientCache.Get(nameof(GitLabOpenApiHttpClient), (config: _config, baseUrl: _config["GitLab:ClientBaseUrl"] ?? _prodBaseUrl), static state =>
+        return _httpClientCache.Get(_cacheKey, (config: _config, baseUrl: _config["GitLab:ClientBaseUrl"] ?? _prodBaseUrl), static state =>
         {
             var apiKey = state.config.GetValueStrict<string>("GitLab:ApiKey");
-            string authHeaderName = state.config["GitLab:AuthHeaderName"] ?? "Bearer {token}";
-            string authHeaderValueTemplate = state.config["GitLab:AuthHeaderValueTemplate"] ?? "{token}";
+            string authHeaderName = state.config["GitLab:AuthHeaderName"] ?? "Authorization";
+            string authHeaderValueTemplate = state.config["GitLab:AuthHeaderValueTemplate"] ?? "Bearer {token}";
             string authHeaderValue = authHeaderValueTemplate.Replace("{token}", apiKey, StringComparison.Ordinal);
 
             return new HttpClientOptions
@@ -50,7 +51,7 @@ public sealed class GitLabOpenApiHttpClient : IGitLabOpenApiHttpClient
     /// </summary>
     public void Dispose()
     {
-        _httpClientCache.RemoveSync(nameof(GitLabOpenApiHttpClient));
+        _httpClientCache.RemoveSync(_cacheKey);
     }
 
     /// <summary>
@@ -59,6 +60,6 @@ public sealed class GitLabOpenApiHttpClient : IGitLabOpenApiHttpClient
     /// <returns>A task that represents the asynchronous operation.</returns>
     public ValueTask DisposeAsync()
     {
-        return _httpClientCache.Remove(nameof(GitLabOpenApiHttpClient));
+        return _httpClientCache.Remove(_cacheKey);
     }
 }

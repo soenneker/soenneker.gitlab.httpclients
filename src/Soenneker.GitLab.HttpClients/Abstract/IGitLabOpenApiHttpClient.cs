@@ -6,7 +6,7 @@ using System.Threading;
 namespace Soenneker.GitLab.HttpClients.Abstract;
 
 /// <summary>
-/// A .NET thread-safe singleton HttpClient for 
+/// Provides an authenticated <see cref="HttpClient"/> for the generated GitLab OpenAPI client.
 /// </summary>
 public interface IGitLabOpenApiHttpClient: IDisposable, IAsyncDisposable
 {
