@@ -11,6 +11,7 @@ using Soenneker.Utils.HttpClientCache.Abstract;
 
 namespace Soenneker.GitLab.HttpClients;
 
+/// <inheritdoc cref="IGitLabOpenApiHttpClient" />
 public sealed class GitLabOpenApiHttpClient : IGitLabOpenApiHttpClient
 {
     private readonly IHttpClientCache _httpClientCache;
