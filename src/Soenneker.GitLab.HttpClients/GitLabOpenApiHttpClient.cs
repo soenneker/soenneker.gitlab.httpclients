@@ -31,7 +31,7 @@ public sealed class GitLabOpenApiHttpClient : IGitLabOpenApiHttpClient
     {
         return _httpClientCache.Get(_cacheKey, (config: _config, baseUrl: _config["GitLab:ClientBaseUrl"] ?? _prodBaseUrl), static state =>
         {
-            var apiKey = state.config.GetValueStrict<string>("GitLab:ApiKey");
+            var apiKey = state.config.GetStringStrict("GitLab:ApiKey");
             string authHeaderName = state.config["GitLab:AuthHeaderName"] ?? "Authorization";
             string authHeaderValueTemplate = state.config["GitLab:AuthHeaderValueTemplate"] ?? "Bearer {token}";
             string authHeaderValue = authHeaderValueTemplate.Replace("{token}", apiKey, StringComparison.Ordinal);
